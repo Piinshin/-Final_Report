@@ -1,8 +1,5 @@
 import numpy as np
-from scipy.optimize import fsolve
-
-points1 = np.load('A_photoCor.npy')
-points2 = np.load('B_photoCor.npy')
+from scipy.optimize import leastsq
 
 #求旋轉矩陣的Fuction
 def FindM(omegao, phio, kappao):
@@ -20,32 +17,31 @@ def FindM(omegao, phio, kappao):
                         [0, 0, 1]])
     return np.dot(np.dot(M_kappa, M_phi), M_omega)
 
-def objective(params, *args):
-    X,Y,Z= params   ##x,y,z代表三個物點座標
-    M, point,focal_lenght,XL,YL,ZL= args  ##points代表一個點的相片座標(x,y)
-    P_array=np.array([X-XL,Y-YL,Z-ZL])
-    p_array=np.array([point[0],point[1],-focal_lenght])
-    # Evaluate the objective functi>>
-    Function = np.dot(M,P_array)-p_array
-    return Function
-
-A_Point = np.empty(shape=(len(points1[:,0]),2))
-B_Point=np.empty(shape=(len(points2[:,0]),2))
-
-def img_to_photo(points,M,focal_lenght,XL,YL,ZL):
-    P_Cor = np.empty(shape=(len(points[:,0]),3))
-    initial_guess=[0,0,0]
-    for i in range(len(points1[:,0])):
-        point=points[i]
-        result=fsolve(objective, initial_guess, args=(M, point,focal_lenght,XL,YL,ZL))
-        P_Cor[i]=result
-    return P_Cor
+def equations(params, *args):
+    X, Y, Z = params  ##x,y,z代表三個物點座標
+    M1, M2,x,y,xx,yy,f, XL, YL, ZL, XLL, YLL, ZLL = args
+    equation1=x+f*(M1[0,0]*(X-XL)+M1[0,1]*(Y-YL)+M1[0,2]*(Z-ZL))/(M1[2,0]*(X-XL)+M1[2,1]*(Y-YL)+M1[2,2]*(Z-ZL))
+    equation2=y+f*(M1[1,0]*(X-XL)+M1[1,1]*(Y-YL)+M1[1,2]*(Z-ZL))/(M1[2,0]*(X-XL)+M1[2,1]*(Y-YL)+M1[2,2]*(Z-ZL))
+    equation3=xx+f*(M2[0,0]*(X-XLL)+M2[0,1]*(Y-YLL)+M2[0,2]*(Z-ZLL))/(M2[2,0]*(X-XLL)+M2[2,1]*(Y-YLL)+M2[2,2]*(Z-ZLL))
+    equation4=yy+f*(M2[1,0]*(X-XLL)+M2[1,1]*(Y-YLL)+M2[1,2]*(Z-ZLL))/(M2[2,0]*(X-XLL)+M2[2,1]*(Y-YLL)+M2[2,2]*(Z-ZLL))
+    return [equation1, equation2, equation3, equation4]
 
 ##A和B的相對方位
 M1=FindM(0,0,0)
 M2=FindM(5.9671801,4.89610752,-8.22253956)
 focal_length = 10.26
+XL,YL,ZL=0,0,0
+XLL,YLL,ZLL=-9.38,-1.7431715,7.88361065
+point1 = np.load('A_photoCor.npy')
+point2 = np.load('B_photoCor.npy')
+initial_guess=[-1,-1,-1]
 
-np.save('A_ObjectCor(P).npy',img_to_photo(points1,M1,focal_length,0,0,0) )
-np.save('B_ObjectCor(P).npy',img_to_photo(points2,M2,focal_length,-9.38,-1.7431715,7.88361065) )
-print(img_to_photo(points2,M2,focal_length,-9.38,-1.7431715,7.88361065))
+print(len(point1[:,0]))
+P_Cor = np.empty(shape=(len(point1[:,0]),3))
+for i in range(len(point1[:,0])):
+    x,y=point1[i,0],point1[i,1]
+    xx,yy=point2[i,0],point2[i,1]
+    result,_ = leastsq(equations, initial_guess, args=(M1, M2,x,y,xx,yy, focal_length, XL, YL, ZL, XLL, YLL, ZLL))
+    print(result)
+    P_Cor[i] = result
+np.save('ObjectCor(P).npy',P_Cor)
