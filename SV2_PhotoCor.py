@@ -15,5 +15,7 @@ def img_to_photo(points):
 ##特徵點轉換後的座標
 A_photoCor=(img_to_photo(imgA_points))
 B_photoCor=(img_to_photo(imgB_points))
+print(A_photoCor)
+print(len(A_photoCor))
 np.save('A_photoCor.npy', A_photoCor)
 np.save('B_photoCor.npy', B_photoCor)

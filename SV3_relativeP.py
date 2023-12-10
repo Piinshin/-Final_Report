@@ -37,7 +37,7 @@ def objective(params, *args):
         A_matrix.append(np.cross(A1, A2))
     A_matrix = np.array(A_matrix)
     A_matrix=np.transpose(A_matrix)
-    # Evaluate the objective functi>>b.(A1xA2)=0
+    # Evaluate the objective function>>b dot.(A1xA2)=0
     Function = np.dot(b,A_matrix)
     return Function
 
@@ -47,8 +47,9 @@ focal_length = 10.26  # 焦距
 points1 = np.load('A_photoCor.npy')
 points2 = np.load('B_photoCor.npy')
 bx=-9.38
-initial_guess = [0, 0, 0,0,0]
+initial_guess = [26,20, -20,-8,30]
 
+##用最小二乘法求解
 result, _ = leastsq(objective, initial_guess, args=(M0, points1, points2, focal_length, bx))
 
 # Print the result
@@ -56,6 +57,5 @@ print("  Solution for omg,phi, kappa:", result[0:3],'\n',"Solution for by bz",re
 
 residuals_at_optimized_params = objective(result, M0, points1, points2, focal_length, bx)
 cost_at_optimized_params = np.sum(residuals_at_optimized_params ** 2)
-
-#print("Residuals at optimized parameters:", residuals_at_optimized_params)
-#print("Cost at optimized parameters:", cost_at_optimized_params)
+print("Residuals at optimized parameters:", residuals_at_optimized_params)
+print("Cost at optimized parameters:", cost_at_optimized_params)

@@ -28,10 +28,10 @@ def equations(params, *args):
 
 ##A和B的相對方位
 M1=FindM(0,0,0)
-M2=FindM(5.9671801,4.89610752,-8.22253956)
+M2=FindM(4.10291277 ,18.70862634 ,-7.51208004) ##
 focal_length = 10.26
 XL,YL,ZL=0,0,0
-XLL,YLL,ZLL=-9.38,-1.7431715,7.88361065
+XLL,YLL,ZLL=-9.38,-0.62539264,-1.73236062  ##
 point1 = np.load('A_photoCor.npy')
 point2 = np.load('B_photoCor.npy')
 initial_guess=[-1,-1,-1]
