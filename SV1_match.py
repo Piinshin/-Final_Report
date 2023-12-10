@@ -18,7 +18,7 @@ matches = bf.knnMatch(descriptors1, descriptors2, k=2)
 # 应用比率测试以筛选匹配
 good_matches = []
 for m, n in matches:
-    if m.distance < 0.5 * n.distance:
+    if m.distance < 0.3 * n.distance:
         good_matches.append(m)
 
 # 输出匹配的特征点的图像坐标
